@@ -1,0 +1,28 @@
+<view class="main">
+
+<view class='orders-address' >
+<view class="orders-address-detail">订单编号: {{orders.orderNumber}}</view>
+<view class="orders-address-detail">创建时间: {{orders.createDate}}</view>
+<view class="orders-address-detail">完成时间: {{orders.finishDate}}</view>
+<view class="orders-address-detail">积分变更: {{orders.totalIntegral}}</view>
+<view class="orders-address-detail">收货地址: {{orders.address}}</view>
+</view>
+
+    <view class="orders-box">
+    
+        <view wx:for="{{orders.goodsList}}" wx:key="index" class="orders-list">
+            <image class="orders-thumb" src="{{item.image}}"></image>
+            <view class="orders-pro-name">{{item.title}}  ( {{item.standard}} )</view>
+            <view class="orders-pro-price">￥{{item.price}} 
+            <text class='txt-decoration'>  原价：￥ {{item.originalPrice}} </text></view>
+            <view class="orders-count-num">数量 ×{{item.num}}</view>
+        </view>
+    </view>
+    
+
+    <view class="orders-footer">
+        <view class="orders-footer-total">付款合计：￥{{orders.totalPrice}}</view>
+        <button size="mini" class='btn1' bindtap="btn1Click">{{btn1Text}}</button>
+        <button size="mini" class='btn2' bindtap="btn2Click">{{btn2Text}}</button>
+    </view>
+</view>

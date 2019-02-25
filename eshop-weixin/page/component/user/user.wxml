@@ -1,0 +1,38 @@
+<view class="main">
+    <view class="header">
+      
+        <image bindtap="bindViewTap" class="thumb" src="{{userInfo.avatarUrl}}" mode="cover"></image>
+        <text class="userinfo-nickname">{{userInfo.nickName}}   </text>
+        <text class='userinfo-integral'>积分 {{integral}}</text>
+        <button class="login-btn" wx:if="{{!hasUserInfo && canIUse}}" open-type="getUserInfo"
+         bindgetuserinfo="getUserInfo"> 点击登录 </button>
+    </view>
+    <view class="address-box">
+        <view class="address-manage">
+            <navigator url="/page/component/address/address">地址管理</navigator>
+        </view>
+    </view>
+    <view class="orders-box">
+        <view class="orders">我的订单</view>
+        <view class="orders-list" wx:for="{{orderList}}" wx:key="index" >
+        <navigator url="../odetails/odetails?orderId={{item.orderId}}">
+            <view class="orders-number">订单编号：{{item.orderNumber}} </view>
+            <view class="orders-detail">
+                <image src="{{item.goodsPicture}}"></image>
+                <view class=""> {{item.goodsName}} ( {{item.goodsStandard}} )</view>
+                <view class="">数量 x{{item.number}}</view>
+                <text class="orders-status">{{item.orderState}}</text>
+            </view>
+        </navigator>
+            <view class="orders-footer">
+                <text>实付：￥{{item.totalPrice}} <text class='order-date'>{{item.createDate}}</text></text>
+                <button size="mini" class="orders-btn"
+ wx:if="{{item.orderState != '已取消' && item.orderState != '无法取消' && item.orderState != '取消中' && item.tradeState == '未支付'}}" 
+                data-index="{{index}}" bindtap="payOrders">去付款</button>
+
+                <button size="mini" class="orders-btn" wx:if="{{item.tradeState == '已支付'}}" 
+                data-index="{{index}}" bindtap="refundOrders">申请退款</button>
+            </view>
+        </view>
+    </view>
+</view>

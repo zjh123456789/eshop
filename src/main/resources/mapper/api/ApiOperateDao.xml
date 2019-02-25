@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 设置为IgoodsDao接口方法提供sql语句配置 -->
+<mapper namespace="com.twinking.eshop.modules.api.dao.ApiOperateDao">
+
+    <sql id="operateColumns">
+        a.sell_price AS "sellPrice",
+        a.original_price AS "originalPrice",
+        a.goods_id AS "id",
+        g.name AS "name",
+        g.picture AS "picture",
+        gd.name AS "standard"
+    </sql>
+
+    <sql id="operateJoins">
+		LEFT JOIN sys_goods g ON g.id = a.goods_id
+		LEFT JOIN sys_goods_type gt ON gt.id = g.type_id
+        LEFT JOIN sys_goods_standard gd ON gd.id = g.standard_id
+    </sql>
+
+	<select id="getSellGoodsDetail" resultType="SellGoodsDetail">
+		SELECT
+		a.sell_price AS "sellPrice",
+		a.original_price AS "originalPrice",
+		a.goods_id AS "id",
+		g.name AS "name",
+		g.picture AS "picture",
+		g.inventory AS "inventory",
+		a.integral AS "integral",
+		g.introduce AS "introduce",
+		gt.name AS "type",
+		gd.name AS "standard"
+		FROM sys_operate a
+		<include refid="operateJoins"/>
+		WHERE a.goods_id = #{id} AND a.state_flag = '0'
+	</select>
+
+    <!-- 最新上线商品 -->
+    <select id="getNewGoodsList" resultType="SellGoods">
+        SELECT
+        <include refid="operateColumns"/>
+        FROM sys_operate a
+        <include refid="operateJoins"/>
+		WHERE a.state_flag = '0'
+		<![CDATA[ AND a.start_date < now() AND a.end_date > now() ]]>
+		ORDER BY a.start_date ASC limit 10
+    </select>
+
+	<!-- 推荐商品 -->
+	<select id="getRecommendGoodsList" resultType="SellGoods">
+		SELECT
+		<include refid="operateColumns"/>
+		FROM sys_operate a
+		<include refid="operateJoins"/>
+		WHERE a.state_flag = '0'
+		<![CDATA[ AND a.start_date < now() AND a.end_date > now() ]]>
+		ORDER BY a.start_date ASC
+	</select>
+
+	<!-- 首发商品 -->
+	<select id="getFirstGoodsList" resultType="SellGoods">
+		SELECT
+		<include refid="operateColumns"/>
+		FROM sys_operate a
+		<include refid="operateJoins"/>
+		WHERE a.state_flag = '0'
+		<![CDATA[ AND a.start_date < now() AND a.end_date > now() ]]>
+		ORDER BY a.start_date ASC
+	</select>
+
+	<!-- 限时抢购商品 -->
+	<select id="getRushGoodsList" resultType="SellGoods">
+		SELECT
+		<include refid="operateColumns"/>
+		FROM sys_operate a
+		<include refid="operateJoins"/>
+		WHERE a.state_flag = '0'
+		<![CDATA[ AND a.start_date < now() AND a.end_date > now() ]]>
+		ORDER BY a.start_date ASC
+	</select>
+
+    <!-- 查询全部 -->
+    <select id="findAllSellGoodsList" resultType="SellGoods">
+        SELECT
+        <include refid="operateColumns"/>
+        FROM sys_operate a
+        <include refid="operateJoins"/>
+		WHERE a.state_flag = '0'
+		<![CDATA[ AND a.start_date < now() AND a.end_date > now() ]]>
+		ORDER BY a.start_date ASC
+	</select>
+
+	<!-- 根据商品类型id获取所有商品 -->
+	<select id="getGoodsListByType" resultType="SellGoods">
+		SELECT
+		a.goods_id AS "id",
+		g.name AS "name",
+		g.picture AS "picture"
+		FROM sys_operate a
+		LEFT JOIN sys_goods g ON g.id = a.goods_id
+		LEFT JOIN sys_goods_type gt ON gt.id = g.type_id
+		WHERE a.state_flag = '0' AND gt.id = #{id}
+		<![CDATA[ AND a.start_date < now() AND a.end_date > now() ]]>
+		ORDER BY a.start_date ASC
+	</select>
+
+    <!-- 获取所有商品类别  不含未分类-->
+    <select id="getGoodsTypeList" resultType="SellGoodsType">
+        SELECT
+        gt.id AS "id",
+        gt.name AS "name"
+        FROM sys_operate a
+        LEFT JOIN sys_goods g ON g.id = a.goods_id
+		LEFT JOIN sys_goods_type gt ON gt.id = g.type_id
+        WHERE a.state_flag = '0' AND gt.id != '0'
+        <![CDATA[ AND a.start_date < now() AND a.end_date > now() ]]>
+        GROUP BY gt.name
+    </select>
+
+</mapper>

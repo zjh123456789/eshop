@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 设置为IgoodsDao接口方法提供sql语句配置 -->
+<mapper namespace="com.twinking.eshop.modules.goods.dao.GoodsTypeDao">
+
+    <sql id="goodsTypeColumns">
+        a.id AS "id",
+        a.name AS "name",
+        a.create_by AS "createBy.id",
+        u1.username AS "createBy.username",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.state_flag AS "stateFlag"
+    </sql>
+
+    <sql id="goodsTypeJoins">
+		LEFT JOIN sys_user u1 ON u1.id = a.create_by
+    </sql>
+
+    <select id="get" resultType="GoodsType">
+        SELECT
+        <include refid="goodsTypeColumns"/>
+        FROM sys_goods_type a
+        <include refid="goodsTypeJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="findList" resultType="GoodsType">
+        SELECT
+        <include refid="goodsTypeColumns"/>
+        FROM sys_goods_type a
+        <include refid="goodsTypeJoins"/>
+		<where>
+			<if test="name != null and name != ''">
+				AND a.name LIKE concat('%',#{name},'%')
+			</if>
+		</where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY  a.id
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 查询全部 -->
+    <select id="findAllList" resultType="GoodsType">
+        SELECT
+        <include refid="goodsTypeColumns"/>
+        FROM sys_goods_type a
+        <include refid="goodsTypeJoins"/>
+        ORDER BY a.id
+    </select>
+
+
+    <!-- 插入 -->
+    <insert id="insert">
+		INSERT INTO sys_goods_type(
+			id,
+			name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			state_flag
+		) VALUES (
+			#{id},
+			#{name},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{stateFlag}
+		)
+	</insert>
+
+    <!-- 更新 -->
+    <update id="update">
+		UPDATE sys_goods_type SET
+			name = #{name},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			state_flag = #{stateFlag}
+		WHERE id = #{id}
+	</update>
+
+
+    <!-- 物理删除 -->
+    <update id="delete">
+		DELETE FROM sys_goods_type
+		WHERE id = #{id}
+	</update>
+
+	<!-- 禁用 -->
+	<update id="deleteByLogic">
+		UPDATE sys_goods_type SET
+			state_flag = '1'
+		WHERE id = #{id}
+	</update>
+
+	<!-- 启用 -->
+	<update id="use">
+		UPDATE sys_goods_type SET
+			state_flag = '0'
+		WHERE id = #{id}
+	</update>
+
+</mapper>

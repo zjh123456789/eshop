@@ -1,0 +1,121 @@
+{
+	"contentManagement": [
+		{
+			"title": "运营管理",
+			"icon": "icon-liulanqi",
+			"href": "",
+          "spread": false,
+          "children": [
+            {
+              "title": "运营计划",
+              "icon": "icon-liulanqi",
+              "href": "operate/list",
+              "spread": false
+            }
+          ]
+		},
+		{
+			"title": "小说管理",
+			"icon": "icon-chakan",
+			"href": "",
+			"spread": false,
+			"children": [
+				{
+					"title": "小说类别",
+					"icon": "icon-chakan",
+					"href": "goods/list",
+					"spread": false
+				},
+				{
+					"title": "小说列表",
+					"icon": "icon-caidan",
+					"href": "goodsType/list",
+					"spread": false
+				},
+				{
+					"title": "小说章节",
+					"icon": "icon-caidan",
+					"href": "goodsStandard/list",
+					"spread": false
+				}
+			]
+		},
+		{
+			"title": "评论管理",
+			"icon": "icon-text",
+			"href": "",
+          "spread": false,
+          "children": [
+            {
+              "title": "订单列表",
+              "icon": "icon-text",
+              "href": "order/list",
+              "spread": false
+            },
+            {
+              "title": "待处理订单",
+              "icon": "icon-text",
+              "href": "order/todoList",
+              "spread": false
+            },
+            {
+              "title": "未支付订单",
+              "icon": "icon-text",
+              "href": "order/unFinishList",
+              "spread": false
+            },
+            {
+              "title": "已完成订单",
+              "icon": "icon-text",
+              "href": "order/finishList",
+              "spread": false
+            }
+          ]
+		}
+	],
+	"memberCenter": [
+		{
+			"title": "会员列表",
+			"icon": "&#xe612;",
+			"href": "customer/list",
+			"spread": false
+		},
+		{
+			"title": "作者列表",
+			"icon": "&#xe612;",
+			"href": "customer/list",
+			"spread": false
+		},
+		{
+			"title": "积分管理",
+			"icon": "icon-vip",
+			"href": "integral/list",
+			"spread": false
+		}
+	],
+	"systemeSttings": [
+		{
+			"title": "管理员列表",
+			"icon": "icon-ziliao",
+			"href": "admin/list",
+			"spread": false
+		},{
+			"title": "角色管理",
+			"icon": "icon-icon10",
+			"href": "role/list",
+			"spread": false
+		},{
+			"title": "菜单管理",
+			"icon": "&#xe64c;",
+			"href": "menu/list",
+			"spread": false
+		},{
+			"title": "权限管理",
+			"icon": "&#xe857;",
+			"href": "authorized/list",
+			"spread": false
+		}
+	]
+}
+
+

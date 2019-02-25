@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 设置为ImenuDao接口方法提供sql语句配置 -->
+<mapper namespace="com.twinking.eshop.modules.sys.dao.MenuDao">
+
+    <resultMap id="menuResult" type="Menu">
+        <id property="id" column="id" />
+        <result property="parentIds" column="parentIds" />
+        <result property="title" column="title" />
+        <result property="href" column="href" />
+        <result property="icon" column="icon" />
+    </resultMap>
+
+    <sql id="menuColumns">
+        a.id AS "id",
+        a.parent_id AS "parent.id",
+		a.parent_ids,
+		a.href AS "href",
+		a.icon AS "icon",
+        a.title AS "title",
+        a.create_by AS "createBy.id",
+        u1.menuname AS "createBy.menuname",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		u2.menuname AS "updateBy.menuname",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.state_flag AS "stateFlag",
+		p.name AS "parent.name"
+    </sql>
+
+    <sql id="menuJoins">
+        LEFT JOIN sys_menu p ON p.id = a.parent_id
+    </sql>
+
+    <select id="get" resultType="Menu">
+        SELECT
+        <include refid="menuColumns"/>
+        FROM sys_menu a
+        <include refid="menuJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="getChildren" parameterType="String" resultMap="menuResult">
+        select * from sys_menu where parent_id = #{id} ORDER BY create_date
+    </select>
+
+    <select id="getParent" parameterType="String" resultMap="menuResult">
+        select * from sys_menu where id = #{id}
+    </select>
+
+    <select id="findAllList" resultMap="menuResult">
+        SELECT
+        <include refid="menuColumns"/>
+        FROM sys_menu a
+        <include refid="menuJoins"/>
+        WHERE a.del_flag = #{STATE_FLAG_NORMAL}
+        ORDER BY a.id
+    </select>
+
+    <select id="findByParentIdsLike"  resultMap="menuResult">
+		SELECT
+			a.id,
+			a.parent_id AS "parent.id",
+			a.parent_ids
+		FROM sys_menu a
+		WHERE a.del_flag = #{STATE_FLAG_NORMAL} AND a.parent_ids LIKE #{parentIds}
+		ORDER BY a.id
+	</select>
+
+
+    <!-- 插入 -->
+    <insert id="insert">
+		INSERT INTO sys_menu(
+			id,,
+			parent_id,
+			parent_ids,
+			title,
+			href,
+			icon,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			state_flag
+		) VALUES (
+			#{id},,
+			#{parent.id},
+			#{parentIds},
+			#{title},
+			#{href},
+			#{icon},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{stateFlag}
+		)
+	</insert>
+
+    <!-- 更新 -->
+    <update id="update">
+		UPDATE sys_menu SET
+			title = #{title},
+			parent_id = #{parent.id},
+			parent_ids = #{parentIds},
+			href = #{href},
+			icon = #{icon},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			state_flag = #{stateFlag}
+		WHERE id = #{id}
+	</update>
+
+
+    <!-- 物理删除 -->
+    <update id="delete">
+		DELETE FROM sys_menu
+		WHERE id = #{id}
+	</update>
+
+	<!-- 禁用 -->
+	<update id="deleteByLogic">
+		UPDATE sys_user SET
+			state_flag = '1'
+		WHERE id = #{id}
+	</update>
+
+	<!-- 启用 -->
+	<update id="use">
+		UPDATE sys_user SET
+			state_flag = '0'
+		WHERE id = #{id}
+	</update>
+
+</mapper>

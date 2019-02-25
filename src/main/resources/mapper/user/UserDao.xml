@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 设置为IUserDao接口方法提供sql语句配置 -->
+<mapper namespace="com.twinking.eshop.modules.user.dao.UserDao">
+
+    <sql id="userColumns">
+        a.id AS "id",
+        a.nickname AS "nickname",
+        a.username AS "username",
+        a.password AS "password",
+        a.sn AS "sn",
+        a.sex AS "sex",
+        a.mail AS "mail",
+        a.phone AS "phone",
+        a.sign AS "sign",
+        a.integral AS "integral",
+        a.role_type AS "role.id",
+        r.name AS "role.name",
+        a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.state_flag AS "stateFlag"
+    </sql>
+
+    <sql id="userJoins">
+        LEFT JOIN sys_role r ON r.id = a.role_type
+    </sql>
+
+    <!-- 根据编号获得用户 -->
+    <select id="get" resultType="User">
+        SELECT
+        <include refid="userColumns"/>
+        FROM sys_user a
+        <include refid="userJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <!-- 根据登录名查询用户 -->
+	<select id="getByUserName" resultType="User" parameterType="User">
+		SELECT
+		<include refid="userColumns"/>
+		FROM sys_user a
+		<include refid="userJoins"/>
+		WHERE a.username = #{username}
+	</select>
+
+    <!-- 分页查询管理员信息 -->
+    <select id="findList" resultType="User">
+        SELECT
+        <include refid="userColumns"/>
+        FROM sys_user a
+        <include refid="userJoins"/>
+		<where>
+			a.role_type != '1'
+			<if test="role != null and role.id != null and role.id != ''">
+				AND a.role_type = #{role.id}
+			</if>
+			<if test="username != null and username != ''">
+				AND a.username = #{username}
+			</if>
+		</where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY  a.id
+            </otherwise>
+        </choose>
+    </select>
+
+	<!-- 分页查询会员信息 -->
+	<select id="findAllCustomer" resultType="User">
+		SELECT
+		<include refid="userColumns"/>
+		FROM sys_user a
+		<include refid="userJoins"/>
+		<where>
+			a.role_type = '1'
+			<if test="username != null and username != ''">
+				AND a.username = #{username}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY  a.id
+			</otherwise>
+		</choose>
+	</select>
+
+    <!-- 查询全部用户 -->
+    <select id="findAllList" resultType="User">
+        SELECT
+        <include refid="userColumns"/>
+        FROM sys_user a
+        <include refid="userJoins"/>
+        ORDER BY a.id
+    </select>
+
+    <!-- 查询全部用户数目 -->
+    <select id="findAllCount" resultType="long">
+		SELECT
+			COUNT(1)
+		FROM sys_user a
+		WHERE a.state_flag = '0'
+	</select>
+
+    <!-- 插入用户 -->
+    <insert id="insert">
+		INSERT INTO sys_user(
+			id,
+			nickname,
+			username,
+			password,
+			sn,
+			sex,
+			phone,
+			mail,
+			sign,
+			integral,
+			role_type,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			state_flag
+		) VALUES (
+			#{id},
+			#{nickname},
+			#{username},
+			#{password},
+			#{sn},
+			#{sex},
+			#{phone},
+			#{mail},
+			#{sign},
+			#{integral},
+			#{role.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{stateFlag}
+		)
+	</insert>
+
+    <!-- 更新用户 -->
+    <update id="update">
+		UPDATE sys_user SET
+			nickname = #{nickname},
+			username = #{username},
+			password = #{password},
+			sn = #{sn},
+			sex = #{sex},
+			phone = #{phone},
+			mail = #{mail},
+			sign = #{sign},
+			integral = #{integral},
+			role_type = #{role.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			state_flag = #{stateFlag}
+		WHERE id = #{id}
+	</update>
+
+    <!-- 更新用户 -->
+    <update id="updateUserInfo">
+		UPDATE sys_user SET
+			nickname = #{nickname},
+			sex = #{sex},
+			phone = #{phone},
+			mail = #{mail},
+			sign = #{sign}
+		WHERE id = #{id}
+	</update>
+
+    <!-- 更新用户密码 -->
+    <update id="updatePasswordById">
+		UPDATE sys_user SET
+			password = #{password}
+		WHERE id = #{id}
+	</update>
+
+    <!-- 物理删除用户 -->
+    <update id="delete">
+		DELETE FROM sys_user
+		WHERE id = #{id}
+	</update>
+
+    <!-- 禁用 -->
+    <update id="deleteByLogic">
+		UPDATE sys_user SET
+			state_flag = '1'
+		WHERE id = #{id}
+	</update>
+
+    <!-- 启用 -->
+	<update id="use">
+		UPDATE sys_user SET
+			state_flag = '0'
+		WHERE id = #{id}
+	</update>
+
+	<!--接口部分-->
+
+	<!-- 根据编号获得用户 -->
+	<select id="getUserById" resultType="User">
+		SELECT
+        a.id AS "id",
+        a.nickname AS "nickname",
+        a.username AS "username",
+        a.password AS "password",
+        a.sn AS "sn",
+        a.sex AS "sex",
+        a.mail AS "mail",
+        a.phone AS "phone",
+        a.sign AS "sign",
+        a.integral AS "integral"
+		FROM sys_user a
+		WHERE a.id = #{id}
+	</select>
+
+	<!-- 根据sn查询用户 -->
+	<select id="getUserBySN" resultType="User" parameterType="User">
+		SELECT
+        a.id AS "id",
+        a.nickname AS "nickname",
+        a.username AS "username",
+        a.password AS "password",
+        a.sn AS "sn",
+        a.sex AS "sex",
+        a.mail AS "mail",
+        a.phone AS "phone",
+        a.sign AS "sign",
+        a.sn AS "sn",
+        a.integral AS "integral"
+		FROM sys_user a
+		WHERE a.sn = #{sn}
+	</select>
+
+	<!-- 根据sn更新积分 -->
+	<update id="updateIntegralBySN">
+		UPDATE sys_user SET
+			integral = #{integral}
+		WHERE sn = #{sn}
+	</update>
+
+	<!-- 根据sn查询用户信息 -->
+	<select id="getUserInfoBySN" resultType="UserInfo">
+        SELECT
+        a.mail AS "mail",
+        a.phone AS "phone",
+        a.sign AS "sign",
+        a.integral AS "integral"
+        FROM sys_user a
+        WHERE a.sn = #{sn}
+    </select>
+
+	<!-- 更新用户 -->
+	<update id="updateUserInfoBySN">
+		UPDATE sys_user SET
+			phone = #{phone},
+			mail = #{mail},
+			sign = #{sign}
+		WHERE sn = #{sn}
+	</update>
+
+</mapper>

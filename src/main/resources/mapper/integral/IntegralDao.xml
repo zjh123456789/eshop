@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 设置为IgoodsDao接口方法提供sql语句配置 -->
+<mapper namespace="com.twinking.eshop.modules.integral.dao.IntegralDao">
+
+    <sql id="integralColumns">
+        a.id AS "id",
+        a.username AS "username",
+        a.changer_integral AS "changeIntegral",
+        a.current_integral AS "currentIntegral",
+        a.user_id AS "userId",
+        a.order_id AS "orderId",
+        a.order_number AS "orderNumber",
+        a.goods_name AS "goodsName",
+        a.goods_picture AS "goodsPicture",
+        a.goods_type_name AS "goodsTypeName",
+        a.goods_original_price AS "goodsOriginalPrice",
+        a.goods_sell_price AS "goodsSellPrice",
+        a.goods_standard_name AS "goodsStandardName",
+        a.buy_number AS "goodsByNumber",
+        a.total_price AS "goodsTotalPrice",
+        a.goods_introduce AS "goodsIntroduce",
+        a.record_date AS "recordDate",
+        a.state_flag AS "stateFlag"
+    </sql>
+
+    <sql id="integralJoins">
+    </sql>
+
+    <select id="get" resultType="Integral">
+        SELECT
+        <include refid="integralColumns"/>
+        FROM sys_integral a
+        <include refid="integralJoins"/>
+        WHERE a.id = #{id} AND state_flag = '0'
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="findList" resultType="Integral">
+        SELECT
+        <include refid="integralColumns"/>
+        FROM sys_integral a
+        <include refid="integralJoins"/>
+		<where>
+            state_flag = '0'
+			<if test="username != null and username != ''">
+				AND a.username LIKE concat('%',#{username},'%')
+			</if>
+            <if test="userId != null and userId != ''">
+                AND a.user_id = #{userId}
+            </if>
+            <if test="orderId != null and orderId != ''">
+                AND a.order_id = #{orderId}
+            </if>
+            <if test="orderNumber != null and orderNumber != ''">
+                AND a.order_number = #{orderNumber}
+            </if>
+		</where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY  a.id
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 根据订单id查询全部 -->
+    <select id="findAllListByOrderId" resultType="Integral">
+        SELECT
+        <include refid="integralColumns"/>
+        FROM sys_integral a
+        <include refid="integralJoins"/>
+        <where>
+            state_flag = '0' AND a.order_id = #{orderId}
+        </where>
+        ORDER BY a.id
+    </select>
+
+    <!-- 根据订单id查询一个 -->
+    <select id="findByOrderIdLimitOne" resultType="Integral">
+        SELECT
+        <include refid="integralColumns"/>
+        FROM sys_integral a
+        <include refid="integralJoins"/>
+        <where>
+            a.order_id = #{orderId}
+        </where>
+        ORDER BY a.id Limit 1
+    </select>
+
+    <!-- 根据用户id查询全部 -->
+    <select id="findAllListByUserId" resultType="Integral">
+        SELECT
+        <include refid="integralColumns"/>
+        FROM sys_integral a
+        <include refid="integralJoins"/>
+        <where>
+            state_flag = '0' AND a.user_id = #{userId}
+        </where>
+        ORDER BY a.id
+    </select>
+
+    <!-- 查询全部 -->
+    <select id="findAllList" resultType="Integral">
+        SELECT
+        <include refid="integralColumns"/>
+        FROM sys_integral a
+        <include refid="integralJoins"/>
+        <where>
+            state_flag = '0'
+        </where>
+        ORDER BY a.id
+    </select>
+
+
+    <!-- 插入 -->
+    <insert id="insert">
+		INSERT INTO sys_integral (
+			id,
+			username,
+			changer_integral,
+			current_integral,
+			user_id,
+			order_id,
+			order_number,
+			goods_name,
+			goods_picture,
+			goods_type_name,
+			goods_original_price,
+			goods_sell_price,
+			goods_standard_name,
+			buy_number,
+			total_price,
+			goods_introduce,
+			record_date,
+			state_flag
+		) VALUES (
+			#{id},
+			#{username},
+			#{changeIntegral},
+			#{currentIntegral},
+			#{userId},
+			#{orderId},
+			#{orderNumber},
+			#{goodsName},
+			#{goodsPicture},
+			#{goodsTypeName},
+			#{goodsOriginalPrice},
+			#{goodsSellPrice},
+			#{goodsStandardName},
+			#{goodsByNumber},
+			#{goodsTotalPrice},
+			#{goodsIntroduce},
+			#{recordDate},
+			#{stateFlag}
+		)
+	</insert>
+
+    <!-- 状态标志（0：正常 1：重要数据，只做伪删除） -->
+    <update id="delete">
+		UPDATE sys_integral SET
+			state_flag = '1'
+		WHERE id = #{id}
+	</update>
+
+    <!--API接口模块-->
+
+    <!-- 根据用户id查询全部 忽略状态-->
+    <select id="findAllListByOrderIdIgnoreState" resultType="Integral">
+        SELECT
+        <include refid="integralColumns"/>
+        FROM sys_integral a
+        <include refid="integralJoins"/>
+        <where>
+            a.order_id = #{orderId}
+        </where>
+        ORDER BY a.id
+    </select>
+
+    <!--积分生效 支付订单-->
+    <update id="integrationIntoEffect">
+		UPDATE sys_integral SET
+			state_flag = '0'
+		WHERE user_id = #{userId} AND order_id = #{orderId}
+	</update>
+
+    <!--积分失效 取消订单或者退款-->
+    <update id="integralFailure">
+		UPDATE sys_integral SET
+			state_flag = '1'
+		WHERE user_id = #{userId} AND order_id = #{orderId}
+	</update>
+
+</mapper>

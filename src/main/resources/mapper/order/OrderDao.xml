@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 设置为IgoodsDao接口方法提供sql语句配置 -->
+<mapper namespace="com.twinking.eshop.modules.order.dao.OrderDao">
+
+    <sql id="orderColumns">
+        a.id AS "id",
+        a.order_number AS "orderNumber",
+        a.user_id AS "userId",
+        u.username AS "username",
+        a.create_date AS "createDate",
+        a.finish_date AS "finishDate",
+        a.trade_state AS "tradeState",
+        a.order_state AS "orderState",
+        a.total_price AS "totalPrice",
+        a.total_integral AS "totalIntegral",
+        a.address AS "address",
+        a.remarks AS "remarks",
+        a.state_flag AS "stateFlag"
+    </sql>
+
+    <sql id="orderJoins">
+        LEFT JOIN sys_user u ON u.id = a.user_id
+    </sql>
+
+    <select id="get" resultType="Order">
+        SELECT
+        <include refid="orderColumns"/>
+        FROM sys_order a
+        <include refid="orderJoins"/>
+        WHERE a.id = #{id} AND a.state_flag = '0'
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="findList" resultType="Order">
+        SELECT
+        <include refid="orderColumns"/>
+        ,'0' AS "listType"
+        FROM sys_order a
+        <include refid="orderJoins"/>
+		<where>
+            a.state_flag = '0'
+			<if test="username != null and username != ''">
+				AND a.username LIKE concat('%',#{username},'%')
+			</if>
+            <if test="orderNumber != null and orderNumber != ''">
+                AND a.order_number = #{orderNumber}
+            </if>
+            <if test="tradeState != null and tradeState != ''">
+                AND a.trade_state = #{tradeState}
+            </if>
+            <if test="orderState != null and orderState != ''">
+                AND a.order_state = #{orderState}
+            </if>
+		</where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY  a.create_date  DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 查询待处理订单 -->
+    <select id="findTodoList" resultType="Order">
+        SELECT
+        <include refid="orderColumns"/>
+        ,'1' AS "listType"
+        FROM sys_order a
+        <include refid="orderJoins"/>
+        <where>
+            a.state_flag = '0'
+            AND a.trade_state = '2' OR a.order_state = '2'
+            <if test="username != null and username != ''">
+                AND a.username LIKE concat('%',#{username},'%')
+            </if>
+            <if test="orderNumber != null and orderNumber != ''">
+                AND a.order_number = #{orderNumber}
+            </if>
+            <if test="tradeState != null and tradeState != ''">
+                AND a.trade_state = #{tradeState}
+            </if>
+            <if test="orderState != null and orderState != ''">
+                AND a.order_state = #{orderState}
+            </if>
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY  a.create_date  DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 查询未支付订单 -->
+    <select id="findUnFinishList" resultType="Order">
+        SELECT
+        <include refid="orderColumns"/>
+        ,'2' AS "listType"
+        FROM sys_order a
+        <include refid="orderJoins"/>
+        <where>
+            a.state_flag = '0'
+            AND a.trade_state = '0'
+            <if test="username != null and username != ''">
+                AND a.username LIKE concat('%',#{username},'%')
+            </if>
+            <if test="orderNumber != null and orderNumber != ''">
+                AND a.order_number = #{orderNumber}
+            </if>
+            <if test="tradeState != null and tradeState != ''">
+                AND a.trade_state = #{tradeState}
+            </if>
+            <if test="orderState != null and orderState != ''">
+                AND a.order_state = #{orderState}
+            </if>
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY  a.create_date  DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 查询已完成订单 -->
+    <select id="findFinishList" resultType="Order">
+        SELECT
+        <include refid="orderColumns"/>
+        ,'3' AS "listType"
+        FROM sys_order a
+        <include refid="orderJoins"/>
+        <where>
+            a.state_flag = '0'
+            AND a.trade_state IN('1','3','4')
+            <if test="username != null and username != ''">
+                AND a.username LIKE concat('%',#{username},'%')
+            </if>
+            <if test="orderNumber != null and orderNumber != ''">
+                AND a.order_number = #{orderNumber}
+            </if>
+            <if test="tradeState != null and tradeState != ''">
+                AND a.trade_state = #{tradeState}
+            </if>
+            <if test="orderState != null and orderState != ''">
+                AND a.order_state = #{orderState}
+            </if>
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY  a.create_date  DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 查询全部 -->
+    <select id="findAllList" resultType="Order">
+        SELECT
+        <include refid="orderColumns"/>
+        FROM sys_order a
+        <include refid="orderJoins"/>
+        WHERE a.state_flag = '0'
+        ORDER BY a.id
+    </select>
+
+
+    <!-- 插入 -->
+    <insert id="insert">
+		INSERT INTO sys_order (
+			id,
+			order_number,
+			user_id,
+			create_date,
+			finish_date,
+			trade_state,
+			order_state,
+			total_price,
+			total_integral,
+			address,
+			remarks,
+			state_flag
+		) VALUES (
+			#{id},
+			#{orderNumber},
+			#{userId},
+			#{createDate},
+			#{finishDate},
+			#{tradeState},
+			#{orderState},
+			#{totalPrice},
+			#{totalIntegral},
+			#{address},
+			#{remarks},
+			#{stateFlag}
+		)
+	</insert>
+
+    <!-- 后台操作订单 -->
+    <update id="update">
+		UPDATE sys_order SET
+			finish_date = #{finishDate},
+			trade_state = #{tradeState},
+			order_state = #{orderState},
+			total_price = #{totalPrice},
+			address = #{address},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+    <!-- 更新支付状态 -->
+    <update id="updateTradeState">
+		UPDATE sys_order SET
+			trade_state = #{tradeState}
+		WHERE id = #{id}
+	</update>
+
+    <!-- 更新订单状态 -->
+    <update id="updateOrderState">
+		UPDATE sys_order SET
+			order_state = #{orderState}
+		WHERE id = #{id}
+	</update>
+
+
+    <!-- 状态标志（0：正常 1：重要数据，只做伪删除） -->
+    <update id="delete">
+		UPDATE sys_order SET
+			state_flag = '1'
+		WHERE id = #{id}
+	</update>
+
+    <!-- API 获取订单列表 根据时间降序-->
+    <select id="getWeChartOrderListUserId" resultType="WeChartOrderList">
+        SELECT
+        a.id AS "orderId",
+        a.order_number AS "orderNumber",
+        a.create_date AS "createDate",
+        a.finish_date AS "finishDate",
+        a.trade_state AS "tradeState",
+        a.order_state AS "orderState",
+        a.total_price AS "totalPrice",
+        a.total_integral AS "totalIntegral"
+        FROM sys_order a
+        WHERE a.state_flag = '0' AND a.user_id = #{userId}
+        ORDER BY a.create_date DESC
+    </select>
+
+    <!--API 设置订单完成时间-->
+    <update id="setOrderCompletionTime">
+		UPDATE sys_order SET
+			finish_date = #{finishDate}
+		WHERE id = #{id}
+	</update>
+
+</mapper>

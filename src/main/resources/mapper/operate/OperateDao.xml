@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 设置为IgoodsDao接口方法提供sql语句配置 -->
+<mapper namespace="com.twinking.eshop.modules.operate.dao.OperateDao">
+
+    <sql id="operateColumns">
+        a.id AS "id",
+        a.sell_price AS "sellPrice",
+        a.original_price AS "originalPrice",
+        a.start_date AS "startDate",
+        a.end_date AS "endDate",
+        a.integral AS "integral",
+        a.goods_id AS "goods.id",
+        g.name AS "goods.name",
+        g.picture AS "goods.picture",
+        g.introduce AS "goods.introduce",
+        gt.name AS "goods.type.name",
+        gd.name AS "goods.goodsStandard.name",
+        a.create_by AS "createBy.id",
+        u1.username AS "createBy.username",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.state_flag AS "stateFlag"
+    </sql>
+
+    <sql id="operateJoins">
+		LEFT JOIN sys_user u1 ON u1.id = a.create_by
+		LEFT JOIN sys_goods g ON g.id = a.goods_id
+		LEFT JOIN sys_goods_type gt ON gt.id = g.type_id
+        LEFT JOIN sys_goods_standard gd ON gd.id = g.standard_id
+    </sql>
+
+    <select id="get" resultType="Operate">
+        SELECT
+        <include refid="operateColumns"/>
+        FROM sys_operate a
+        <include refid="operateJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="findList" resultType="Operate">
+        SELECT
+        <include refid="operateColumns"/>
+        FROM sys_operate a
+        <include refid="operateJoins"/>
+		<where>
+			<if test="goods != null and goods.name != null and goods.name != ''">
+				AND g.name LIKE concat('%',#{goods.name},'%')
+			</if>
+		</where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY  a.id
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 查询全部 -->
+    <select id="findAllList" resultType="Operate">
+        SELECT
+        <include refid="operateColumns"/>
+        FROM sys_operate a
+        <include refid="operateJoins"/>
+        ORDER BY a.id
+    </select>
+
+
+    <!-- 插入 -->
+    <insert id="insert">
+		INSERT INTO sys_operate(
+			id,
+			goods_id,
+			sell_price,
+			original_price,
+			start_date,
+			end_date,
+			integral,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			state_flag
+		) VALUES (
+			#{id},
+			#{goods.id},
+			#{sellPrice},
+			#{originalPrice},
+			#{startDate},
+			#{endDate},
+			#{integral},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{stateFlag}
+		)
+	</insert>
+
+    <!-- 更新 -->
+    <update id="update">
+		UPDATE sys_operate SET
+			goods_id = #{goods.id},
+			sell_price = #{sellPrice},
+			original_price = #{originalPrice},
+			start_date = #{startDate},
+			end_date = #{endDate},
+			integral = #{integral},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			state_flag = #{stateFlag}
+		WHERE id = #{id}
+	</update>
+
+
+    <!-- 物理删除 -->
+    <update id="delete">
+		DELETE FROM sys_operate
+		WHERE id = #{id}
+	</update>
+
+	<!-- 禁用 -->
+	<update id="deleteByLogic">
+		UPDATE sys_operate SET
+			state_flag = '1'
+		WHERE id = #{id}
+	</update>
+
+	<!-- 启用 -->
+	<update id="use">
+		UPDATE sys_operate SET
+			state_flag = '0'
+		WHERE id = #{id}
+	</update>
+
+</mapper>
